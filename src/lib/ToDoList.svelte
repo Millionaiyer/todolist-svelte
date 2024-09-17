@@ -1,31 +1,55 @@
 <script>
     import Button from "./Button.svelte";
+    import { createEventDispatcher } from "svelte";
 
-    export let todos = [];
+    export let toDos = [];
     let inputText = "";
 
-    const handleToDo = () => {
-        if (!inputText) return;
-        // console.log(inputText)
+    const dispatch = createEventDispatcher();
+
+    const handleAddToDo = () => {
+        const isNotCancelled = dispatch(
+            "addToDo",
+            {
+                title: inputText,
+            },
+            { cancelable: true },
+        );
+        inputText = '';
+        if (isNotCancelled) {
+            console.log("yolo ");
+        }
     };
+    const removeToDo = (id) => {
+        dispatch('removeToDo',{
+            id
+        })
+    }
+
+    const handleToggleToDO = (id,value) => {
+        dispatch('toggleToDo',{
+            id,value
+        })
+    }
 </script>
 
 <div>
-    {#each todos as { id, title }, index (id)}
-        {@const number = index + 1}
+    {#each toDos as { id, title,completed } (id)}
         <li>
-            {number} - {title}
+            <label>
+                <input on:input={(event) => {
+                    event.currentTarget.checked=completed;
+                    handleToggleToDO(id,!completed)
+                }} type="checkbox" name="" id="" checked={completed}>
+                {title}
+            </label> 
+            <button on:click={() => removeToDo(id)}>remove</button>
         </li>
     {/each}
 
-    <form on:submit|preventDefault={handleToDo}>
+    <form on:submit|preventDefault={handleAddToDo}>
         <input bind:value={inputText} />
-        <!-- <Button type='submit' disabled={true}>Click me</Button> -->
-        <Button 
-        type="Submit" 
-        disabled={!inputText} 
-        on:click={() => console.log('hello')}
-      >Click</Button>
-      
+        <Button type="Submit" disabled={!inputText}>Click</Button>
     </form>
+        
 </div>
